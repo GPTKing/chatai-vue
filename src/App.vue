@@ -728,6 +728,15 @@ export default {
       if (this.conversation.length == 0) {
         return
       }
+
+      var conversations = this.conversations;
+      for (let idx in conversations) {
+        var conv = conversations[idx];
+        delete conv.editable;
+        delete conv.selected;
+        delete conv.delete;
+      }
+      
       this.loadId()
     },
     loadId() {
