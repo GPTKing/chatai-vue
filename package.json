@@ -1,6 +1,6 @@
 {
-  "name": "m-chat",
-  "version": "1.4.0",
+  "name": "chatai",
+  "version": "1.0.0",
   "private": false,
   "main": "lib-dist/m-chat.umd.min.js",
   "types": "types/index.d.ts",
