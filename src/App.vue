@@ -270,10 +270,8 @@
                 </div>
               </form>
               <div class="px-3 pt-2 pb-3 text-center text-xs text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
-                <a href="https://help.openai.com/en/articles/6825453-chatgpt-release-notes" target="_blank"
-                  rel="noreferrer" class="underline">ChatGPT Jan 30 Version</a>. Free Research Preview.
-                Our goal is to make AI systems more natural and safe to interact with. Your feedback will
-                help us improve.
+                <a href="https://gitee.com/MIEAPP/chatai-vue" target="_blank"
+                  rel="noreferrer" class="underline">chatai-vue</a> 本项目基于openai开放api开发，仅供学习 AI 使用。
               </div>
             </div>
           </main>
