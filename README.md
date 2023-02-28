@@ -5,8 +5,25 @@
 [chatai-python](https://gitee.com/MIEAPP/chatai-python)
 
 
+#### 使用代码（二次开发）
+```
+# 下载依赖
+npm i
+
+# 本地开发
+npm run dev
+
+# 打包
+npm run build
+```
+
+#### 使用代码（直接使用）
+dist目录就是打包好的代码，可以直接放在nginx的静态文件下。
+
+
 下面是前端演示截图：
 
+![](imgs/视频演示.gif)
 ![](imgs/1677497989802.png)
 ![](imgs/1677498054107.png)
 ![](imgs/1677498069769.png)
