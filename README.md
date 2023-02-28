@@ -21,6 +21,9 @@ npm run build
 dist目录就是打包好的代码，可以直接放在nginx的静态文件下。
 
 
+视频演示
+[视频](https://www.bilibili.com/video/BV1QA411C7mN/)
+
 下面是前端演示截图：
 
 ![](imgs/视频演示.gif)
