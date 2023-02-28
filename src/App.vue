@@ -270,8 +270,8 @@
                 </div>
               </form>
               <div class="px-3 pt-2 pb-3 text-center text-xs text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
-                <a href="https://gitee.com/MIEAPP/chatai-vue" target="_blank"
-                  rel="noreferrer" class="underline">chatai-vue</a> 本项目基于openai开放api开发，仅供学习 AI 使用。
+                <a href="https://gitee.com/MIEAPP/chatai-vue" target="_blank" rel="noreferrer"
+                  class="underline">chatai-vue</a> 本项目基于openai开放api开发，仅供学习 AI 使用。
               </div>
             </div>
           </main>
@@ -526,23 +526,23 @@ const renderer = {
       codeHtml = hljs.highlightAuto(code).value
     }
 
-    console.log(code, infostring, escaped);
-    console.log(codeHtml);
+    console.log(code, infostring, escaped, codeHtml);
 
     return `<div class="bg-black mb-4 rounded-md">
-        <div class="code_header flex items-center relative text-gray-200 bg-gray-800 px-4 py-2 text-xs font-sans">
-          <span>${infostring}</span>
-          <button class="flex ml-auto gap-2">
-            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-              </svg>
-              <span>Copy code</span>
-          </button>
-        </div>
-        <div class="p-4 overflow-y-auto">
-            <code class="!whitespace-pre hljs language-${infostring}">${codeHtml}</code>
-        </div>
-      </div>`;
+      <div class="code_header flex items-center relative text-gray-200 bg-gray-800 px-4 py-2 text-xs font-sans">
+        <span>${infostring}</span>
+        <button onclick="copy(this)" class="flex ml-auto gap-2">
+          <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          <span>Copy code</span>
+          <code style="display:none">${code}</code>
+        </button>
+      </div>
+      <div class="p-4 overflow-y-auto">
+        <code class="!whitespace-pre hljs language-${infostring}">${codeHtml}</code>
+      </div>
+    </div>`;
   },
   paragraph(text) {
     return `<p style="white-space:pre-wrap;">${text}</p>`
@@ -565,6 +565,25 @@ export default {
     };
   },
   methods: {
+    vueCopy(node) {
+      var code = node.getElementsByTagName("code")[0].innerHTML
+
+      this.$copyText(code).then(
+        res => {
+          var svg = `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Copied!</span>`
+          const nodeInnerHtml = node.innerHTML
+          node.innerHTML = svg;
+
+          setTimeout(() => { node.innerHTML = nodeInnerHtml }, 1000);
+        },
+        err => {
+          console.log('复制失败');
+        }
+      );
+    },
     changeTheme(theme) {
       this.theme = theme;
       var html = document.getElementsByTagName("html")[0]
@@ -734,7 +753,7 @@ export default {
         delete conv.selected;
         delete conv.delete;
       }
-      
+
       this.loadId()
     },
     loadId() {
@@ -858,6 +877,8 @@ export default {
 
     let chatDivEle = this.$refs.chatContainer;
     chatDivEle.addEventListener('scroll', this.isScrollAndNotBottom, true)
+
+    window.copy = this.vueCopy
   }
 };
 </script>
