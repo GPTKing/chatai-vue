@@ -270,8 +270,13 @@
                 </div>
               </form>
               <div class="px-3 pt-2 pb-3 text-center text-xs text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
+                <a href="https://gitee.com/MIEAPP/chatai-python" target="_blank" rel="noreferrer"
+                  class="underline">后端开源：chatai-python</a> 使用3月2号开放的
+                <a href="https://platform.openai.com/docs/guides/chat" target="_blank" rel="noreferrer"
+                  class="underline">gpt-3.5-turbo</a>
+                模型,能力和官网一样强大。<br />
                 <a href="https://gitee.com/MIEAPP/chatai-vue" target="_blank" rel="noreferrer"
-                  class="underline">chatai-vue</a> 本项目基于openai开放api开发，仅供学习 AI 使用。
+                  class="underline">前端开源：chatai-vue</a> 本开源项目基于openai开放api开发，仅供学习 AI 使用。
               </div>
             </div>
           </main>
@@ -465,16 +470,46 @@
     </div>
 
     <!-- 弹窗 -->
-    <div id="headlessui-portal-root" v-if="false">
-      <div data-headlessui-portal=""><button type="button" aria-hidden="true"
-          style="position: fixed; top: 1px; left: 1px; width: 1px; height: 0px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"></button>
+    <div id="headlessui-portal-root" v-if="popupShow">
+      <div data-headlessui-portal="">
+        <button type="button" aria-hidden="true"
+          style="position: fixed; top: 1px; left: 1px; width: 1px; height: 0px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;">
+        </button>
         <div>
           <div class="relative z-50" id="headlessui-dialog-:r3:" role="dialog" aria-modal="true"
             data-headlessui-state="open" aria-labelledby="headlessui-dialog-title-:r5:">
             <div class="fixed inset-0 bg-gray-500/90 transition-opacity dark:bg-gray-800/90"></div>
             <div class="fixed inset-0 z-50 overflow-y-auto">
               <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div
+
+                <div v-if="popupShow"
+                  class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:p-6 sm:max-w-lg opacity-100 translate-y-0 sm:scale-100"
+                  id="headlessui-dialog-panel-:r1:" data-headlessui-state="open">
+                  <div class="flex items-center sm:flex">
+                    <div class="mt-3 text-center sm:mt-0 sm:text-left"></div>
+                  </div>
+                  <div class="prose dark:prose-invert">
+                    <div class="mb-5">
+                      <h2 class="!mt-4 font-normal !mb-2"><b>ChatGPT</b></h2>
+                    </div>
+                    <div class="w-full h-[1px] bg-gray-300 opacity-20"></div>
+                    <h4 class="mb-4">本开源项目基于openai开放api开发，使用最新的gpt-3.5-turbo，前端使用vue高仿ChatGpt界面，仅供学习使用.</h4>
+                    <div class="flex gap-4 flex-col text-sm">
+                      <div class="flex p-4 bg-gray-50 dark:bg-white/5 rounded-md items-center gap-4 min-h-[71px]">
+                        <div class="w-10 text-2xl text-center">🚨</div>
+                        <div class="flex-1 leading-5">本开源项目有搭建教程，如有能力可以自行搭建，因为openai的api是付费的，项目不会长期提供演示。（用完官网送的18美元，就会停止项目演示）</div>
+                      </div>
+                      <div class="flex p-4 bg-gray-50 dark:bg-white/5 rounded-md items-center gap-4 min-h-[71px]">
+                        <div class="w-10 text-2xl text-center">🔬</div>
+                        <div class="flex-1 leading-5">如果需要合作，可以联系我，微信：zjb592466695</div>
+                      </div>
+                    </div>
+                    <div class="flex gap-4 mt-6"><button @click="closePopup" class="btn flex justify-center gap-2 btn-primary ml-auto">Done</button></div>
+                  </div>
+                  <div class="mt-5 flex flex-col gap-3 sm:mt-4 sm:flex-row-reverse"></div>
+                </div>
+
+                <div v-if="false"
                   class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:p-6 sm:max-w-lg"
                   id="headlessui-dialog-panel-:r4:" data-headlessui-state="open">
                   <div class="flex items-center sm:flex">
@@ -554,6 +589,7 @@ export default {
   data() {
     return {
       theme: "light",
+      popupShow: true,
       avatarIdx: 1,
       conversations: [],
       conversation: [],
@@ -565,6 +601,9 @@ export default {
     };
   },
   methods: {
+    closePopup(){
+      this.popupShow = false;
+    },  
     vueCopy(node) {
       var code = node.getElementsByTagName("code")[0].innerHTML
 
@@ -795,6 +834,8 @@ export default {
       conv.selected = true
       this.oldConv = conv;
 
+      document.title = conv.title || "chatai";
+
       this.axios.get(`/api/conv/${conv.id}`)
         .then((result) => {
           console.log(result);
@@ -952,5 +993,35 @@ body {
 .load_dot3 {
   -webkit-animation: blink 1s steps(4, start) infinite;
   animation: blink 1s steps(4, start) infinite;
+}
+
+#app .markdown h1 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h2 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h3 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h4 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h5 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h6 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
 }
 </style>
