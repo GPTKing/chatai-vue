@@ -251,7 +251,7 @@
                   </div>
                   <div
                     class="flex flex-col w-full py-2 flex-grow md:py-3 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-white dark:bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
-                    <textarea v-model="chatMsg" @keyup.enter.stop.prevent="send" tabindex="0" data-id="root"
+                    <textarea v-model="chatMsg" ref="inputChat" @keydown="judgeInput" tabindex="0" data-id="root"
                       style="max-height: 200px; height: 24px; overflow-y: hidden;" rows="1"
                       class="m-0 w-full resize-none border-0 bg-transparent p-0 pl-2 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent md:pl-0"></textarea>
                     <button @click.stop.prevent="send" :disabled="convLoading"
@@ -270,13 +270,8 @@
                 </div>
               </form>
               <div class="px-3 pt-2 pb-3 text-center text-xs text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
-                <a href="https://gitee.com/MIEAPP/chatai-python" target="_blank" rel="noreferrer"
-                  class="underline">后端开源：chatai-python</a> 使用3月2号开放的
-                <a href="https://platform.openai.com/docs/guides/chat" target="_blank" rel="noreferrer"
-                  class="underline">gpt-3.5-turbo</a>
-                模型,能力和官网一样强大。<br />
                 <a href="https://gitee.com/MIEAPP/chatai-vue" target="_blank" rel="noreferrer"
-                  class="underline">前端开源：chatai-vue</a> 本开源项目基于openai开放api开发，仅供学习 AI 使用。
+                  class="underline">开源：chatai-vue</a> 本开源项目前端使用vue，后端基于openai开放api开发，仅供学习 AI 使用。
               </div>
             </div>
           </main>
@@ -497,14 +492,16 @@
                     <div class="flex gap-4 flex-col text-sm">
                       <div class="flex p-4 bg-gray-50 dark:bg-white/5 rounded-md items-center gap-4 min-h-[71px]">
                         <div class="w-10 text-2xl text-center">🚨</div>
-                        <div class="flex-1 leading-5">本开源项目有搭建教程，如有能力可以自行搭建，因为openai的api是付费的，项目不会长期提供演示。（用完官网送的18美元，就会停止项目演示）</div>
+                        <div class="flex-1 leading-5">
+                          本开源项目有搭建教程，如有能力可以自行搭建，因为openai的api是付费的，项目不会长期提供演示。（用完官网送的18美元，就会停止项目演示）</div>
                       </div>
                       <div class="flex p-4 bg-gray-50 dark:bg-white/5 rounded-md items-center gap-4 min-h-[71px]">
                         <div class="w-10 text-2xl text-center">🔬</div>
                         <div class="flex-1 leading-5">如果需要合作，可以联系我，微信：zjb592466695</div>
                       </div>
                     </div>
-                    <div class="flex gap-4 mt-6"><button @click="closePopup" class="btn flex justify-center gap-2 btn-primary ml-auto">Done</button></div>
+                    <div class="flex gap-4 mt-6"><button @click="closePopup"
+                        class="btn flex justify-center gap-2 btn-primary ml-auto">Done</button></div>
                   </div>
                   <div class="mt-5 flex flex-col gap-3 sm:mt-4 sm:flex-row-reverse"></div>
                 </div>
@@ -565,7 +562,7 @@ const renderer = {
 
     return `<div class="bg-black mb-4 rounded-md">
       <div class="code_header flex items-center relative text-gray-200 bg-gray-800 px-4 py-2 text-xs font-sans">
-        <span>${infostring}</span>
+        <span>${infostring || ""}</span>
         <button onclick="copy(this)" class="flex ml-auto gap-2">
           <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
@@ -601,9 +598,26 @@ export default {
     };
   },
   methods: {
-    closePopup(){
+    changeHeight() {
+      var elem = this.$refs.inputChat;
+      elem.style.height = '24px';
+      var scrollHeight = elem.scrollHeight;
+      if (24 >= scrollHeight || this.chatMsg.length == 0) {
+        this.resetHeight();
+        return;
+      }
+
+      elem.style.removeProperty("overflow-y")
+      elem.style.height = scrollHeight + 'px';
+    },
+    resetHeight() {
+      var elem = this.$refs.inputChat;
+      elem.style.height = '24px';
+      elem.style["overflow-y"] = 'hidden';
+    },
+    closePopup() {
       this.popupShow = false;
-    },  
+    },
     vueCopy(node) {
       var code = node.getElementsByTagName("code")[0].innerHTML
 
@@ -720,13 +734,21 @@ export default {
         })
         .catch((err) => { });
     },
+    judgeInput(e) {
+      if (!e.shiftKey && e.keyCode == 13) {
+        e.cancelBubble = true;  //ie阻止冒泡行为
+        e.stopPropagation(); //Firefox阻止冒泡行为
+        e.preventDefault(); //取消事件的默认动作*换行
+        this.send();
+      }
+    },
     send() {
       if (this.chatMsg.trim().length == 0) {
         return;
       }
 
       if (this.convLoading) {
-        return
+        return;
       }
 
       this.convLoading = true;
@@ -908,6 +930,14 @@ export default {
   },
   computed: {
 
+  },
+  watch: {
+    chatMsg(newVal, oldVal) {
+      if (newVal === oldVal) {
+        return;
+      }
+      this.changeHeight();
+    }
   },
   mounted: function () {
     var theme = localStorage.getItem("theme") || "light"
