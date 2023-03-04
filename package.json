@@ -61,8 +61,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/null_639_5368/m-chat.git"
+    "url": "https://gitee.com/MIEAPP/chatai-vue"
   },
-  "homepage": "https://gitee.com/null_639_5368/m-chat",
+  "homepage": "https://gitee.com/MIEAPP/chatai-vue",
   "license": "MIT"
 }
