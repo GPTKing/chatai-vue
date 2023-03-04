@@ -2,12 +2,9 @@
   "name": "chatai",
   "version": "1.0.0",
   "private": false,
-  "main": "lib-dist/m-chat.umd.min.js",
-  "types": "types/index.d.ts",
   "scripts": {
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "build:lib": "vue-cli-service build --mode lib --target lib --name  m-chat src/package/index.js ",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
