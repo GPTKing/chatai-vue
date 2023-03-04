@@ -1,8 +1,33 @@
 <template>
   <div id="app">
+
     <div id="__next">
       <div class="overflow-hidden w-full h-full relative">
         <div class="flex h-full flex-1 flex-col md:pl-[260px]">
+          <div
+            class="sticky top-0 z-10 flex items-center border-b border-white/20 bg-gray-800 pl-1 pt-1 text-gray-200 sm:pl-3 md:hidden">
+            <div>
+              <button @click="showSlideMethod" type="button"
+                class="-ml-0.5 -mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-md hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white dark:hover:text-white"><span
+                  class="sr-only">Open sidebar</span><svg stroke="currentColor" fill="none" stroke-width="1.5"
+                  viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" height="1em"
+                  width="1em" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <h1 class="flex-1 text-center text-base font-normal">{{chatTitle}}</h1>
+            <button @click.stop="newChat" type="button" class="px-3"><svg stroke="currentColor" fill="none"
+                stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"
+                height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+
           <main class="relative h-full w-full transition-width flex flex-col overflow-hidden items-stretch flex-1">
             <!-- 聊天窗 -->
             <div class="flex-1 overflow-hidden">
@@ -237,7 +262,7 @@
               class="absolute bottom-0 left-0 w-full border-t md:border-t-0 dark:border-white/20 md:border-transparent md:dark:border-transparent md:bg-vert-light-gradient bg-white dark:bg-gray-800 md:!bg-transparent dark:md:bg-vert-dark-gradient">
               <form class="stretch mx-2 flex flex-row gap-3 pt-2 last:mb-2 md:last:mb-6 lg:mx-auto lg:max-w-3xl lg:pt-6">
                 <div class="relative flex h-full flex-1 md:flex-col">
-                  <div class="flex ml-1 mt-1.5 md:w-full md:m-auto md:mb-2 gap-0 md:gap-2 justify-center">
+                  <div class="flex ml-1 md:w-full md:m-auto md:mb-2 gap-0 md:gap-2 justify-center">
                     <button v-if="conversation.length > 0" @click.stop.prevent="chatRepeat" id="chatRepeat"
                       class="btn flex justify-center gap-2 btn-neutral border-0 md:border">
                       <svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round"
@@ -246,7 +271,8 @@
                         <polyline points="1 4 1 10 7 10"></polyline>
                         <polyline points="23 20 23 14 17 14"></polyline>
                         <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
-                      </svg>Regenerate response
+                      </svg>
+                      <p class="none">Regenerate response</p>
                     </button>
                   </div>
                   <div
@@ -280,8 +306,9 @@
         <!-- 菜单导航 -->
         <div class="dark hidden bg-gray-900 md:fixed md:inset-y-0 md:flex md:w-[260px] md:flex-col">
           <div class="flex h-full min-h-0 flex-col ">
-            <div class="scrollbar-trigger flex h-full w-full flex-1 items-start border-white/20">
-              <nav class="flex h-full flex-1 flex-col space-y-1 p-2">
+            <div ref="menu" class="scrollbar-trigger flex h-full w-full flex-1 items-start border-white/20">
+
+              <nav ref="navEle" class="flex h-full flex-1 flex-col space-y-1 p-2">
                 <a @click.stop="newChat"
                   class="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm mb-2 flex-shrink-0 border border-white/20"><svg
                     stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"
@@ -454,14 +481,57 @@
                     <line x1="10" y1="14" x2="21" y2="3"></line>
                   </svg>Updates &amp; FAQ</a>
               </nav>
+
             </div>
           </div>
         </div>
       </div>
       <div class="absolute top-0 left-0 right-0 z-[2]"></div>
     </div>
-    <div portal-container=""><span
-        class="pointer-events-none fixed inset-0 z-[60] mx-auto my-2 flex max-w-[560px] flex-col items-stretch justify-start md:pb-5"></span>
+
+    <div v-show="showSlide" class="semi-portal" style="z-index: 1000;">
+      <div class="">
+        <div class="semi-modal-mask"></div>
+        <div role="none" class="semi-modal-wrap">
+          <div class="semi-modal semi-modal-small" id="dialog-3" style="width: 0px;">
+            <div role="dialog" aria-modal="true" aria-labelledby="semi-modal-title" aria-describedby="semi-modal-body"
+              class="semi-modal-content">
+              <div class="semi-modal-body-wrapper">
+                <div class="semi-modal-body" x-semi-prop="children">
+                  <div class="fixed inset-0 z-40 flex">
+                    <div class="relative flex w-full max-w-xs flex-1 flex-col bg-gray-900 translate-x-0"
+                      id="headlessui-dialog-panel-:r1:" data-headlessui-state="open">
+                      <div class="absolute top-0 right-0 -mr-12 pt-2 opacity-100">
+                        <button @click="closeShowSlide" type="button"
+                          class="ml-1 flex h-10 w-10 items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"><span
+                            class="sr-only">Close sidebar</span><svg stroke="currentColor" fill="none" stroke-width="1.5"
+                            viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-white"
+                            height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+                      <div ref="slideNavContainer" style="width:320px"
+                        class="flex h-full flex-1 items-start border-white/20">
+
+
+                      </div>
+                    </div>
+                    <div @click="closeShowSlide" style="width:calc(100% - 320px)" class="flex-shrink-0"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div portal-container="">
+      <span
+        class="pointer-events-none fixed inset-0 z-[60] mx-auto my-2 flex max-w-[560px] flex-col items-stretch justify-start md:pb-5">
+      </span>
     </div>
 
     <!-- 弹窗 -->
@@ -591,13 +661,23 @@ export default {
       conversations: [],
       conversation: [],
       chatMsg: "",
+      chatTitle: "New chat",
       convLoading: false,
+      showSlide: false,
       isShowGoBottom: false,
       oldConv: undefined,
       convTitletmp: ""
     };
   },
   methods: {
+    closeShowSlide() {
+      this.showSlide = false;
+      this.$refs.menu.appendChild(this.$refs.navEle);
+    },
+    showSlideMethod() {
+      this.showSlide = true;
+      this.$refs.slideNavContainer.appendChild(this.$refs.navEle);
+    },
     changeHeight() {
       var elem = this.$refs.inputChat;
       elem.style.height = '24px';
@@ -694,10 +774,8 @@ export default {
       if (md == "") {
         return "<p></p>"
       }
-      console.log("md", md, conv);
       var htmlMD = marked.parse(md);
       htmlMD = htmlMD.trim();
-      console.log("htmlMD", htmlMD);
       return htmlMD;
     },
     refrechConversation() {
@@ -777,13 +855,17 @@ export default {
 
       var that = this;
       let cdata = {
+        "cid": this.cid,
         "prompt": chatMsg
       }
-      this.axios.post(`/api/chat/${this.cid}`, cdata)
+
+      this.axios.post(`/api/chat`, cdata)
         .then((result) => {
           console.log(result);
           var resp = result.data;
-          var content = resp.data;
+          var data = resp.data;
+          that.cid = data.cid;
+          var content = data.message;
 
           var conv = this.conversation[this.conversation.length - 1];
           conv["speeches"] = [content];
@@ -807,6 +889,8 @@ export default {
         return
       }
 
+      this.chatTitle = "New chat";
+      document.title = "New chat";
       var conversations = this.conversations;
       for (let idx in conversations) {
         var conv = conversations[idx];
@@ -818,16 +902,8 @@ export default {
       this.loadId()
     },
     loadId() {
-      var that = this;
-      this.axios.post(`/api/generate/id`, {})
-        .then((result) => {
-          console.log(result);
-          var resp = result.data;
-
-          that.cid = resp.data;
-          this.conversation = []
-        })
-        .catch((err) => { });
+      this.conversation = [];
+      this.cid = undefined;
     },
     loadConversations() {
       let convs = localStorage.getItem("conversations") || "[]";
@@ -857,6 +933,7 @@ export default {
       this.oldConv = conv;
 
       document.title = conv.title || "chatai";
+      this.chatTitle = conv.title || "chatai";
 
       this.axios.get(`/api/conv/${conv.id}`)
         .then((result) => {
@@ -1053,5 +1130,15 @@ body {
 #app .markdown h6 {
   margin-bottom: 0rem;
   margin-top: 0rem;
+}
+
+@media (max-width: 640px) {
+  #app .none {
+    display: none;
+  }
+}
+
+.w-180px {
+  width: 180px;
 }
 </style>
