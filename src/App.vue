@@ -18,7 +18,7 @@
                 </svg>
               </button>
             </div>
-            <h1 class="flex-1 text-center text-base font-normal">{{chatTitle}}</h1>
+            <h1 class="flex-1 text-center text-base font-normal">{{ chatTitle }}</h1>
             <button @click.stop="newChat" type="button" class="px-3"><svg stroke="currentColor" fill="none"
                 stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"
                 height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
@@ -319,7 +319,7 @@
                 </a>
 
                 <!-- 对话列表 -->
-                <div class="flex-col flex-1 overflow-y-auto border-b border-white/20">
+                <div class="flex-col flex-1 overflow-y-auto border-b border-white/20" style="padding-bottom: 5px;">
                   <div class="flex flex-col gap-2 text-gray-100 text-sm">
 
                     <template v-for="conversation, cidx in conversations">
@@ -386,7 +386,7 @@
                       </a>
 
 
-                      <a v-else @click.stop.prevent="selectConversation(conversation)"
+                      <a v-else @click.stop.prevent="selectConversation(conversation, true)"
                         :class="{ 'bg-gray-800 hover:bg-gray-800 pr-14': conversation.selected, 'hover:bg-[#2A2B32] hover:pr-4': !conversation.selected }"
                         class="flex py-3 px-3 items-center gap-3 relative rounded-md cursor-pointer break-all group">
                         <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round"
@@ -567,7 +567,8 @@
                       </div>
                       <div class="flex p-4 bg-gray-50 dark:bg-white/5 rounded-md items-center gap-4 min-h-[71px]">
                         <div class="w-10 text-2xl text-center">🔬</div>
-                        <div class="flex-1 leading-5">如果需要合作，可以联系我，微信：zjb592466695</div>
+                        <div class="flex-1 leading-5">随着使用人数的增多和api被墙等原因，演示环境过几天就会关闭问答功能。如果需要长期使用，可以联系我，微信：zjb592466695
+                        </div>
                       </div>
                     </div>
                     <div class="flex gap-4 mt-6"><button @click="closePopup"
@@ -873,11 +874,14 @@ export default {
 
           that.convLoading = false;
           if (first) {
-            that.conversations.push({
+
+            var newConv = {
               "id": that.cid,
               "title": chatMsg
-            })
+            }
 
+            that.conversations.push(newConv);
+            that.selectConversation(newConv, false);
             that.saveConversations();
           }
 
@@ -924,7 +928,7 @@ export default {
       this.conversations = []
       this.saveConversations();
     },
-    selectConversation(conv) {
+    selectConversation(conv, loadConv) {
       var that = this;
       if (this.oldConv) {
         this.oldConv.selected = false;
@@ -934,6 +938,10 @@ export default {
 
       document.title = conv.title || "chatai";
       this.chatTitle = conv.title || "chatai";
+
+      if (!loadConv) {
+        return;
+      }
 
       this.axios.get(`/api/conv/${conv.id}`)
         .then((result) => {
@@ -1033,11 +1041,6 @@ export default {
 
 
 <style lang="scss">
-// * {
-//   margin: 0px;
-//   padding: 0px;
-// }
-
 html,
 body {
   height: 100%;
