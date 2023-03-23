@@ -1,6 +1,6 @@
 ### chatai
 使用vue高仿了chatgpt的前端，后端使用python flask openai实现。
-3月2日，openai的api更新，开放了最新的gpt-3.5-turbo模型，后端使用了最新模型在分支toGpt3.5上。
+3月2日，openai的api更新，开放了最新的gpt-3.5-turbo模型，后端使用了最新模型在分支toGpt3.5上，加上了流式响应。
 新的模型更加强大，更加智能。
 有能力的可以自行部署。
 

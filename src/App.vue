@@ -280,8 +280,8 @@
               <form class="stretch mx-2 flex flex-row gap-3 pt-2 last:mb-2 md:last:mb-6 lg:mx-auto lg:max-w-3xl lg:pt-6">
                 <div class="relative flex h-full flex-1 md:flex-col">
                   <div class="flex ml-1 md:w-full md:m-auto md:mb-2 gap-0 md:gap-2 justify-center">
-                    <button v-if="conversation.length > 0" @click.stop.prevent="chatRepeat" id="chatRepeat"
-                      class="btn flex justify-center gap-2 btn-neutral border-0 md:border">
+                    <button v-if="!convLoading && conversation.length > 0" @click.stop.prevent="chatRepeat"
+                      id="chatRepeat" class="btn flex justify-center gap-2 btn-neutral border-0 md:border">
                       <svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round"
                         stroke-linejoin="round" class="h-3 w-3" height="1em" width="1em"
                         xmlns="http://www.w3.org/2000/svg">
@@ -291,6 +291,18 @@
                       </svg>
                       <p class="none">Regenerate response</p>
                     </button>
+
+                    <button v-if="convLoading" @click.stop.prevent="stopChat" id="stopChat"
+                      class="btn relative btn-neutral border-0 md:border">
+                      <div class="flex w-full items-center justify-center gap-2">
+                        <svg stroke="currentColor" fill="none" stroke-width="1.5" viewBox="0 0 24 24"
+                          stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3" height="1em" width="1em"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        </svg>Stop generating
+                      </div>
+                    </button>
+
                   </div>
                   <div
                     class="flex flex-col w-full py-2 flex-grow md:py-3 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-white dark:bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
@@ -699,10 +711,56 @@ export default {
       showSlide: false,
       isShowGoBottom: false,
       oldConv: undefined,
-      convTitletmp: ""
+      convTitletmp: "",
+      source: undefined,
+      rsource: undefined,
+      tsource: undefined
     };
   },
   methods: {
+    closeSource() {
+      if (that.source) {
+        that.source.close();
+        that.source = undefined;
+      }
+      if (that.tsource) {
+        that.tsource.close();
+        that.tsource = undefined;
+
+      }
+      if (that.rsource) {
+        that.rsource.close();
+        that.rsource = undefined;
+      }
+    },
+    stopChat() {
+      var that = this;
+      this.axios.put(`/api/stop/chat/${this.cid}`, {})
+        .then((result) => {
+          var rconv = that.conversation[that.conversation.length - 1];
+          rconv["loading"] = false;
+          that.convLoading = false;
+
+          if (that.conversation.length == 2 && rconv["speeches"].length == 1) {
+            var newConv = {
+              "id": that.cid,
+              "title": "New chat"
+            }
+
+            that.generateConvTitle(newConv);
+            that.conversations.unshift(newConv);
+            that.selectConversation(newConv, false);
+            that.saveConversations();
+          }
+
+          that.refrechConversation();
+          that.closeSource();
+        })
+        .catch((err) => {
+          that.closeSource();
+        });
+
+    },
     closeShowSlide() {
       this.showSlide = false;
       this.$refs.menu.appendChild(this.$refs.navEle);
@@ -815,7 +873,7 @@ export default {
       const isOdd = count % 2 === 1;
 
       // 根据判断结果返回相应的字符串
-      return isOdd ? str + substr : str;
+      return isOdd ? str + "\n" + substr : str;
     },
     mdToHtml(md, conv) {
       if (md == "") {
@@ -846,7 +904,7 @@ export default {
       rconv["speeches"].push("");
       that.refrechConversation()
 
-      var rsource = new EventSource(`/api/chat/repeat/${this.cid}`);
+      var rsource = this.rsource = new EventSource(`/api/chat/repeat/${this.cid}`);
       rsource.addEventListener("open", function () {
         console.log("connect");
       });
@@ -861,6 +919,7 @@ export default {
           rconv["loading"] = false;
           that.convLoading = false;
           that.refrechConversation();
+          that.rsource = undefined;
           return;
         }
 
@@ -881,6 +940,7 @@ export default {
       rsource.addEventListener("error", function (e) {
         console.log("error:" + e.data);
         rsource.close();
+        that.rsource = undefined;
       });
     },
     judgeInput(e) {
@@ -925,7 +985,7 @@ export default {
       this.handleScrollBottom();
 
       var that = this;
-      var source = new EventSource(`/api/chat/${this.cid}?prompt=${encodeURIComponent(chatMsg)}`);
+      var source = this.source = new EventSource(`/api/chat/${this.cid}?prompt=${encodeURIComponent(chatMsg)}`);
 
       source.addEventListener("open", function () {
         console.log("connect");
@@ -952,9 +1012,9 @@ export default {
             that.selectConversation(newConv, false);
             that.saveConversations();
 
-
           }
           that.refrechConversation();
+          that.source = undefined;
           return;
         }
 
@@ -974,11 +1034,12 @@ export default {
       source.addEventListener("error", function (e) {
         console.log("error:" + e.data);
         source.close();
+        that.source = undefined;
       });
     },
     generateConvTitle(conv) {
       var that = this;
-      var tsource = new EventSource(`/api/chat/title/${this.cid}`);
+      var tsource = this.tsource = new EventSource(`/api/chat/title/${this.cid}`);
 
       //如果服务器响应报文中没有指明事件，默认触发message事件
       conv.title = ""
@@ -987,6 +1048,7 @@ export default {
           tsource.close();
           that.selectConversation(conv, false);
           that.saveConversations();
+          that.tsource = undefined;
           return
         }
 
@@ -997,8 +1059,9 @@ export default {
       tsource.addEventListener("error", function (e) {
         console.log("error:" + e.data);
         tsource.close();
+        that.tsource = undefined;
       });
-      
+
     },
     newChat() {
       if (this.conversation.length == 0) {
